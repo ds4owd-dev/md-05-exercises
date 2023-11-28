@@ -1,0 +1,69 @@
+---
+title: "Display tables"
+format:
+  html:
+    embed-resources: true
+    toc: true
+execute:
+  warning: false
+editor_options: 
+  chunk_output_type: console
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(gt)
+library(gtsummary)
+library(knitr)
+library(DT)
+```
+
+## Import
+
+We continue to work with a subset of the "What a Waste" database.
+
+```{r}
+waste_gt <- read_rds("data/processed/waste-city-level-sml.rds")
+```
+
+## Transform
+
+```{r}
+waste_tbl_income <- waste_gt |> 
+    filter(!is.na(generation_kg_capita))  |> 
+    group_by(income_cat) |> 
+    summarise(
+        count = n(),
+        mean = mean(generation_kg_capita),
+        sd = sd(generation_kg_capita),
+        median = median(generation_kg_capita),
+        min = min(generation_kg_capita),
+        max = max(generation_kg_capita)
+    )
+```
+
+## Table
+
+```{r}
+waste_tbl_income
+```
+
+```{r}
+waste_tbl_income |> 
+    gt() |> 
+    tab_header(title = "Waste generation per capita (kg/year) by income group",
+               subtitle = "Data from 326 cities") |>
+    fmt_number(columns = count:max, decimals = 0) |> 
+    cols_label(income_cat = "income category")
+```
+
+@tbl-waste-income highlights that cities in countries classfied as high income countries generate more waste per capita than cities in lower income countries.
+
+```{r}
+#| label: tbl-waste-income
+#| tbl-cap: "Waste generation per capita (kg/year) by income group. Data from 326 cities."
+waste_tbl_income |> 
+    rename(`income category` = income_cat) |>
+    kable(digits = 0)
+```

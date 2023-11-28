@@ -1,0 +1,58 @@
+---
+title: "Display tables"
+format:
+  html:
+    embed-resources: true
+    toc: true
+execute:
+  warning: false
+editor_options: 
+  chunk_output_type: console
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(gt)
+library(gtsummary)
+library(knitr)
+library(DT)
+```
+
+## Import
+
+We continue to work with a subset of the "What a Waste" database.
+
+```{r}
+waste_gt <- read_rds("data/processed/waste-city-level-sml.rds")
+```
+
+## Transform
+
+```{r}
+waste_tbl_income <- waste_gt |> 
+    filter(!is.na(generation_kg_capita))  |> 
+    group_by(income_cat) |> 
+    summarise(
+        count = n(),
+        mean = mean(generation_kg_capita),
+        sd = sd(generation_kg_capita),
+        median = median(generation_kg_capita),
+        min = min(generation_kg_capita),
+        max = max(generation_kg_capita)
+    )
+```
+
+## Table
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
