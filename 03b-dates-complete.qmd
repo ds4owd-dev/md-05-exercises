@@ -11,12 +11,16 @@ editor_options:
 editor: visual
 ---
 
+We load the required packages for data manipulation and reading Excel files.
+
 ```{r}
 library(tidyverse)
 library(readxl)
 ```
 
 ## Dates
+
+We read an Excel file containing dates in various formats.
 
 ```{r}
 
@@ -28,35 +32,41 @@ In R and other programming languages, dates are stored as numbers. The number of
 
 In Excel, dates are stored as numbers of days since 1900-01-01. In Excel, the date number 1 corresponds to "1900-01-01," but this system incorrectly considers 1900 as a leap year, which it is not. As a result, to correctly interpret date numbers that originate from systems like Excel, the origin "1899-12-30" is used to account for this discrepancy
 
+We convert different date formats to proper date classes using functions from the lubridate package. We handle ISO format, US format (month/day/year), EU format (day/month/year), numeric dates from Excel, extract dates from datetime values, adjust time zones, and add today's date. The `OlsonNames()` function displays all available time zones.
+
 ```{r}
-dates_class <- dates |> 
-    mutate(date_iso = as_date(date_iso)) |> 
-    mutate(date_us = mdy(date_us)) |> 
-    mutate(date_eu = dmy(date_eu)) |> 
-    mutate(date_num = as_date(date_num, origin = "1899-12-30")) |> 
-    mutate(date = as_date(date_time)) |> 
+dates_class <- dates |>
+    mutate(date_iso = as_date(date_iso)) |>
+    mutate(date_us = mdy(date_us)) |>
+    mutate(date_eu = dmy(date_eu)) |>
+    mutate(date_num = as_date(date_num, origin = "1899-12-30")) |>
+    mutate(date = as_date(date_time)) |>
     mutate(date_time_tz = with_tz(date_time, tzone = "Africa/Kampala")) |>
     mutate(today = today())
 
 OlsonNames()
 ```
 
+We demonstrate how dates are stored internally as numbers, showing the numeric value of today's date and converting the number 1 back to a date.
+
 ```{r}
 as.numeric(today())
 as_date(1)
 ```
 
+We extract various components from a date: year, month (with French labels), quarter, week, day, day of week (with French labels), day of year, and week of year.
+
 ```{r}
-dates_class |> 
-    select(today) |> 
+dates_class |>
+    select(today) |>
     mutate(year = year(today)) |>
-    mutate(month = month(today, label = TRUE, abbr = FALSE, locale = "fr_FR")) |> 
+    mutate(month = month(today, label = TRUE, abbr = FALSE, locale = "fr_FR")) |>
     mutate(quarter = quarter(today)) |>
     mutate(week = week(today)) |>
     mutate(day = day(today)) |>
     mutate(day_of_week = wday(today, label = TRUE, abbr = FALSE, locale = "fr_FR")) |>
     mutate(day_of_year = yday(today)) |>
-    mutate(week_of_year = week(today)) 
+    mutate(week_of_year = week(today))
 
 
 ```

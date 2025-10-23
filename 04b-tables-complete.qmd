@@ -11,6 +11,8 @@ editor_options:
 editor: visual
 ---
 
+We load the required packages for data manipulation and creating formatted tables.
+
 ```{r}
 library(tidyverse)
 library(gt)
@@ -23,16 +25,20 @@ library(DT)
 
 We continue to work with a subset of the "What a Waste" database.
 
+We read the waste data from an RDS file, which preserves R data types including factors.
+
 ```{r}
 waste_gt <- read_rds("data/processed/waste-city-level-sml.rds")
 ```
 
 ## Transform
 
+We calculate summary statistics for waste generation per capita, grouped by income category. We remove missing values and compute count, mean, standard deviation, median, minimum, and maximum values.
+
 ```{r}
-waste_tbl_income <- waste_gt |> 
-    filter(!is.na(generation_kg_capita))  |> 
-    group_by(income_cat) |> 
+waste_tbl_income <- waste_gt |>
+    filter(!is.na(generation_kg_capita))  |>
+    group_by(income_cat) |>
     summarise(
         count = n(),
         mean = mean(generation_kg_capita),
@@ -45,25 +51,31 @@ waste_tbl_income <- waste_gt |>
 
 ## Table
 
+We display the summary table in its default format.
+
 ```{r}
 waste_tbl_income
 ```
 
+We create a formatted table using the gt package, adding a title and subtitle, formatting numbers to show no decimal places, and renaming the income category column.
+
 ```{r}
-waste_tbl_income |> 
-    gt() |> 
+waste_tbl_income |>
+    gt() |>
     tab_header(title = "Waste generation per capita (kg/year) by income group",
                subtitle = "Data from 326 cities") |>
-    fmt_number(columns = count:max, decimals = 0) |> 
+    fmt_number(columns = count:max, decimals = 0) |>
     cols_label(income_cat = "income category")
 ```
 
 @tbl-waste-income highlights that cities in countries classfied as high income countries generate more waste per capita than cities in lower income countries.
 
+We create a cross-referenceable table using the kable function from the knitr package, with a label and caption that can be referenced in the text. We rename the column and format numbers to show no decimal places.
+
 ```{r}
 #| label: tbl-waste-income
 #| tbl-cap: "Waste generation per capita (kg/year) by income group. Data from 326 cities."
-waste_tbl_income |> 
+waste_tbl_income |>
     rename(`income category` = income_cat) |>
     kable(digits = 0)
 ```

@@ -11,12 +11,16 @@ editor_options:
 editor: visual
 ---
 
+We load the required packages for data manipulation and reading Excel files.
+
 ```{r}
 library(tidyverse)
 library(readxl)
 ```
 
 ## Dates
+
+We read an Excel file containing dates in various formats.
 
 ```{r}
 
@@ -28,13 +32,19 @@ In R and other programming languages, dates are stored as numbers. The number of
 
 In Excel, dates are stored as numbers of days since 1900-01-01. In Excel, the date number 1 corresponds to "1900-01-01," but this system incorrectly considers 1900 as a leap year, which it is not. As a result, to correctly interpret date numbers that originate from systems like Excel, the origin "1899-12-30" is used to account for this discrepancy
 
-```{r}
-
-```
+We convert different date formats to proper date classes using functions from the lubridate package. We handle ISO format, US format (month/day/year), EU format (day/month/year), numeric dates from Excel, extract dates from datetime values, adjust time zones, and add today's date. The `OlsonNames()` function displays all available time zones.
 
 ```{r}
 
 ```
+
+We demonstrate how dates are stored internally as numbers, showing the numeric value of today's date and converting the number 1 back to a date.
+
+```{r}
+
+```
+
+We extract various components from a date: year, month (with French labels), quarter, week, day, day of week (with French labels), day of year, and week of year.
 
 ```{r}
 
