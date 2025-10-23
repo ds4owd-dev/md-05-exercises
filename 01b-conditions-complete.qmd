@@ -11,6 +11,8 @@ editor_options:
 editor: visual
 ---
 
+We load the required packages for data manipulation and visualization.
+
 ```{r}
 library(tidyverse)
 library(ggthemes)
@@ -20,11 +22,15 @@ library(ggthemes)
 
 We continue to work with a subset of the "What a Waste" database.
 
+We read the waste data from a CSV file.
+
 ```{r}
 waste <- read_csv("data/processed/waste-city-level-sml.csv")
 ```
 
 We will also use an example spreadsheet that was created by one of the course participants.
+
+We read the faecal sludge solids data from an Excel file.
 
 ```{r}
 solids <- readxl::read_excel("data/raw/TS_poo_2022.xlsx")
@@ -32,12 +38,16 @@ solids <- readxl::read_excel("data/raw/TS_poo_2022.xlsx")
 
 ## Explore
 
+We use `glimpse()` to view the structure and first few values of the waste dataset.
+
 ```{r}
 glimpse(waste)
 ```
 
+We count the number of observations in each income category.
+
 ```{r}
-waste |> 
+waste |>
     count(income_id)
 ```
 
@@ -47,11 +57,11 @@ Conditional statements with mutate() & case_when() of dplyr R package
 
 ### waste data
 
-```{r}
-#| eval: false
+We calculate per capita waste generation and create descriptive income categories using `case_when()`. Then we define custom factor levels and convert both income variables to factors with the specified order.
 
-waste_cat <- waste |> 
-    mutate(generation_kg_capita = generation_tons_year / population * 1000) |> 
+```{r}
+waste_cat <- waste |>
+    mutate(generation_kg_capita = generation_tons_year / population * 1000) |>
     mutate(income_cat = case_when(
         income_id == "HIC" ~ "high income",
         income_id == "UMC" ~ "upper-middle income",
@@ -62,26 +72,24 @@ waste_cat <- waste |>
 
 levels_income <- c("HIC", "UMC", "LMC", "LIC")
 
-levels_income_cat <- c("high income", 
+levels_income_cat <- c("high income",
                        "upper-middle income",
                        "lower-middle income",
                        "low income")
 
 waste_fct <- waste_cat |>
-    mutate(income_id = factor(income_id, levels = levels_income)) |> 
-    mutate(income_cat = factor(income_cat, levels = levels_income_cat)) |> 
+    mutate(income_id = factor(income_id, levels = levels_income)) |>
+    mutate(income_cat = factor(income_cat, levels = levels_income_cat)) |>
     relocate(income_cat, .after = income_id)
 
 ```
 
-```{r}
-write_rds(x = waste_fct, file = "data/processed/waste-city-level-sml.rds")
-```
-
 ### Faecal sludge solids data
 
+We use `case_when()` to apply a correction factor of 100 to septic tank measurements, while keeping all other source types unchanged.
+
 ```{r}
-solids |> 
+solids |>
     mutate(total_solids_gL = case_when(
         source_type == "septic tank" ~ total_solids_gL * 100,
         .default = total_solids_gL
@@ -92,33 +100,36 @@ solids |>
 
 ### Categories as character
 
+We create a boxplot with jittered points showing waste generation by income category, using character variables for the categories.
+
 ```{r}
 #| eval: true
 ggplot(data = waste_cat,
-       mapping = aes(x = income_cat, 
-                     y = generation_kg_capita, 
+       mapping = aes(x = income_cat,
+                     y = generation_kg_capita,
                      color = income_cat)) +
     geom_boxplot(outlier.shape = NA) +
     geom_jitter(size = 3, width = 0.1, alpha = 0.3) +
     scale_color_colorblind() +
     labs(x = "Income group",
-         y = "Waste generation (tons per capita per year)") 
+         y = "Waste generation (tons per capita per year)")
 ```
 
 ### Categories as factor
 
-```{r}
+We create the same plot as above, but now using factor variables for the categories, which ensures the income groups appear in the correct economic order.
 
+```{r}
 #| eval: true
 ggplot(data = waste_fct,
-       mapping = aes(x = income_cat, 
-                     y = generation_kg_capita, 
+       mapping = aes(x = income_cat,
+                     y = generation_kg_capita,
                      color = income_cat)) +
     geom_boxplot(outlier.shape = NA) +
     geom_jitter(size = 3, width = 0.1, alpha = 0.3) +
     scale_color_colorblind() +
     labs(x = "Income group",
-         y = "Waste generation (tons per capita per year)") 
+         y = "Waste generation (tons per capita per year)")
 ```
 
 ## Communicate
